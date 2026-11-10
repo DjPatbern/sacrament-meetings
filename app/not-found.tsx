@@ -26,7 +26,7 @@ export default function NotFound() {
             Browse meetings
           </Link>
           <Link className="button button-secondary" href="/">
-            Return home 
+            Return home
           </Link>
         </div>
       </section>

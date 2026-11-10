@@ -273,6 +273,30 @@ h3 {
   display: grid;
   gap: 16px;
 }
+.meeting-search {
+  margin-bottom: 24px;
+}
+.meeting-search label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--p950);
+  font-weight: 800;
+}
+.empty-results {
+  padding: 48px 30px;
+  border: 1px dashed var(--p200);
+  border-radius: 20px;
+  text-align: center;
+  background: var(--p50);
+}
+.empty-results h2,
+.empty-results p {
+  margin: 0;
+}
+.empty-results p {
+  margin-top: 8px;
+  color: var(--muted);
+}
 .meeting-card {
   display: grid;
   grid-template-columns: 1fr auto auto;
@@ -437,6 +461,50 @@ h3 {
   color: var(--p800);
   font-weight: 700;
 }
+.meeting-skeletons {
+  display: grid;
+  gap: 16px;
+}
+.search-skeleton,
+.meeting-skeleton {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: linear-gradient(100deg, var(--p50) 20%, #fff 40%, var(--p50) 60%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.25s linear infinite;
+}
+.search-skeleton {
+  width: 100%;
+  height: 58px;
+  margin-bottom: 8px;
+  border-radius: 16px;
+}
+.meeting-skeleton {
+  display: grid;
+  gap: 10px;
+  min-height: 142px;
+  padding: 28px 30px;
+  border-radius: 20px;
+}
+.meeting-skeleton span,
+.meeting-skeleton strong {
+  display: block;
+  height: 12px;
+  border-radius: 999px;
+  background: var(--p200);
+}
+.meeting-skeleton span {
+  width: 36%;
+}
+.meeting-skeleton strong {
+  width: 62%;
+  height: 20px;
+}
+@keyframes skeleton-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
 .spinner {
   width: 18px;
   height: 18px;
@@ -453,6 +521,35 @@ h3 {
 .site-footer {
   background: var(--p950);
   color: #fff;
+}
+.admin-bar {
+  background: var(--p950);
+  color: #fff;
+}
+.admin-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 54px;
+  gap: 24px;
+}
+.admin-bar a {
+  color: var(--p200);
+  font-weight: 700;
+}
+.admin-placeholder {
+  padding: 48px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: linear-gradient(135deg, var(--p50), #fff);
+}
+.admin-placeholder h1 {
+  margin: 0;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+}
+.admin-placeholder > p:last-child {
+  max-width: 620px;
+  color: var(--muted);
 }
 .footer-inner {
   display: flex;
