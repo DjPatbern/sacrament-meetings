@@ -10,7 +10,7 @@ type MeetingFormAction = (
   formData: FormData,
 ) => Promise<MeetingFormState>;
 
-const initialState: MeetingFormState = { message: "" };
+const initialState: MeetingFormState = { message: "", revision: 0 };
 
 function FieldErrors({
   field,
@@ -45,16 +45,27 @@ export function MeetingForm({
     Boolean(
       state.errors?.[field as keyof NonNullable<typeof state.errors>]?.length,
     );
-  const announcements = meeting?.announcements.join("\n") ?? "";
+  const values = state.values;
+  const announcements =
+    values?.announcements ?? meeting?.announcements.join("\n") ?? "";
   const wardBusiness =
-    meeting?.wardBusiness.map((item) => item.description).join("\n") ?? "";
+    values?.wardBusiness ??
+    meeting?.wardBusiness.map((item) => item.description).join("\n") ??
+    "";
   const speakers =
+    values?.speakers ??
     meeting?.speakers
       .map((item) => `${item.name} | ${item.topic} | ${item.type}`)
-      .join("\n") ?? "";
+      .join("\n") ??
+    "";
 
   return (
-    <form action={formAction} className="meeting-form" noValidate>
+    <form
+      key={state.revision}
+      action={formAction}
+      className="meeting-form"
+      noValidate
+    >
       <div className="form-section-heading">
         <p className="eyebrow">Meeting information</p>
         <h2>Sunday and leadership</h2>
@@ -68,7 +79,7 @@ export function MeetingForm({
             name="date"
             type="date"
             required
-            defaultValue={meeting?.date}
+            defaultValue={values?.date ?? meeting?.date}
             aria-describedby="date-error"
             aria-invalid={hasError("date")}
           />
@@ -81,7 +92,9 @@ export function MeetingForm({
             id="meetingType"
             name="meetingType"
             required
-            defaultValue={meeting?.meetingType ?? "regular"}
+            defaultValue={
+              values?.meetingType ?? meeting?.meetingType ?? "regular"
+            }
             aria-describedby="meetingType-error"
             aria-invalid={hasError("meetingType")}
           >
@@ -100,7 +113,7 @@ export function MeetingForm({
             name="presiding"
             type="text"
             required
-            defaultValue={meeting?.presiding}
+            defaultValue={values?.presiding ?? meeting?.presiding}
             aria-describedby="presiding-error"
             aria-invalid={hasError("presiding")}
           />
@@ -114,7 +127,7 @@ export function MeetingForm({
             name="conducting"
             type="text"
             required
-            defaultValue={meeting?.conducting}
+            defaultValue={values?.conducting ?? meeting?.conducting}
             aria-describedby="conducting-error"
             aria-invalid={hasError("conducting")}
           />
@@ -133,7 +146,9 @@ export function MeetingForm({
               type="number"
               min="1"
               required
-              defaultValue={meeting?.openingHymn.number}
+              defaultValue={
+                values?.openingHymnNumber ?? meeting?.openingHymn.number
+              }
               aria-describedby="openingHymnNumber-error"
               aria-invalid={hasError("openingHymnNumber")}
             />
@@ -146,7 +161,9 @@ export function MeetingForm({
               name="openingHymnTitle"
               type="text"
               required
-              defaultValue={meeting?.openingHymn.title}
+              defaultValue={
+                values?.openingHymnTitle ?? meeting?.openingHymn.title
+              }
               aria-describedby="openingHymnTitle-error"
               aria-invalid={hasError("openingHymnTitle")}
             />
@@ -159,7 +176,7 @@ export function MeetingForm({
               name="openingPrayer"
               type="text"
               required
-              defaultValue={meeting?.openingPrayer}
+              defaultValue={values?.openingPrayer ?? meeting?.openingPrayer}
               aria-describedby="openingPrayer-error"
               aria-invalid={hasError("openingPrayer")}
             />
@@ -179,7 +196,9 @@ export function MeetingForm({
               type="number"
               min="1"
               required
-              defaultValue={meeting?.sacramentHymn.number}
+              defaultValue={
+                values?.sacramentHymnNumber ?? meeting?.sacramentHymn.number
+              }
               aria-describedby="sacramentHymnNumber-error"
               aria-invalid={hasError("sacramentHymnNumber")}
             />
@@ -192,7 +211,9 @@ export function MeetingForm({
               name="sacramentHymnTitle"
               type="text"
               required
-              defaultValue={meeting?.sacramentHymn.title}
+              defaultValue={
+                values?.sacramentHymnTitle ?? meeting?.sacramentHymn.title
+              }
               aria-describedby="sacramentHymnTitle-error"
               aria-invalid={hasError("sacramentHymnTitle")}
             />
@@ -233,7 +254,9 @@ export function MeetingForm({
               id="stakeBusiness"
               name="stakeBusiness"
               type="checkbox"
-              defaultChecked={meeting?.stakeBusiness}
+              defaultChecked={
+                values?.stakeBusiness ?? meeting?.stakeBusiness ?? false
+              }
               aria-describedby="stakeBusiness-error"
               aria-invalid={hasError("stakeBusiness")}
             />
@@ -276,7 +299,9 @@ export function MeetingForm({
               type="number"
               min="1"
               required
-              defaultValue={meeting?.closingHymn.number}
+              defaultValue={
+                values?.closingHymnNumber ?? meeting?.closingHymn.number
+              }
               aria-describedby="closingHymnNumber-error"
               aria-invalid={hasError("closingHymnNumber")}
             />
@@ -289,7 +314,9 @@ export function MeetingForm({
               name="closingHymnTitle"
               type="text"
               required
-              defaultValue={meeting?.closingHymn.title}
+              defaultValue={
+                values?.closingHymnTitle ?? meeting?.closingHymn.title
+              }
               aria-describedby="closingHymnTitle-error"
               aria-invalid={hasError("closingHymnTitle")}
             />
@@ -302,7 +329,7 @@ export function MeetingForm({
               name="closingPrayer"
               type="text"
               required
-              defaultValue={meeting?.closingPrayer}
+              defaultValue={values?.closingPrayer ?? meeting?.closingPrayer}
               aria-describedby="closingPrayer-error"
               aria-invalid={hasError("closingPrayer")}
             />

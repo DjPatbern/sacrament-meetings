@@ -101,31 +101,42 @@ const MeetingFormSchema = z.object({
 
 type MeetingFormFields = z.input<typeof MeetingFormSchema>;
 
-export type MeetingFormState = {
-  message: string;
-  errors?: Partial<Record<keyof MeetingFormFields, string[]>>;
+export type MeetingFormValues = {
+  [Field in keyof MeetingFormFields]: Field extends "stakeBusiness"
+    ? boolean
+    : string;
 };
 
-function readFormData(
-  formData: FormData,
-): Record<keyof MeetingFormFields, FormDataEntryValue | null> {
+export type MeetingFormState = {
+  message: string;
+  revision: number;
+  errors?: Partial<Record<keyof MeetingFormFields, string[]>>;
+  values?: MeetingFormValues;
+};
+
+function readFormData(formData: FormData): MeetingFormValues {
+  const text = (field: keyof MeetingFormFields) => {
+    const value = formData.get(field);
+    return typeof value === "string" ? value : "";
+  };
+
   return {
-    date: formData.get("date"),
-    meetingType: formData.get("meetingType"),
-    presiding: formData.get("presiding"),
-    conducting: formData.get("conducting"),
-    announcements: formData.get("announcements"),
-    openingHymnNumber: formData.get("openingHymnNumber"),
-    openingHymnTitle: formData.get("openingHymnTitle"),
-    openingPrayer: formData.get("openingPrayer"),
-    wardBusiness: formData.get("wardBusiness"),
-    stakeBusiness: formData.get("stakeBusiness"),
-    sacramentHymnNumber: formData.get("sacramentHymnNumber"),
-    sacramentHymnTitle: formData.get("sacramentHymnTitle"),
-    speakers: formData.get("speakers"),
-    closingHymnNumber: formData.get("closingHymnNumber"),
-    closingHymnTitle: formData.get("closingHymnTitle"),
-    closingPrayer: formData.get("closingPrayer"),
+    date: text("date"),
+    meetingType: text("meetingType"),
+    presiding: text("presiding"),
+    conducting: text("conducting"),
+    announcements: text("announcements"),
+    openingHymnNumber: text("openingHymnNumber"),
+    openingHymnTitle: text("openingHymnTitle"),
+    openingPrayer: text("openingPrayer"),
+    wardBusiness: text("wardBusiness"),
+    stakeBusiness: formData.get("stakeBusiness") !== null,
+    sacramentHymnNumber: text("sacramentHymnNumber"),
+    sacramentHymnTitle: text("sacramentHymnTitle"),
+    speakers: text("speakers"),
+    closingHymnNumber: text("closingHymnNumber"),
+    closingHymnTitle: text("closingHymnTitle"),
+    closingPrayer: text("closingPrayer"),
   };
 }
 
@@ -158,30 +169,48 @@ function toMeetingInput(
   };
 }
 
-function validateMeeting(formData: FormData) {
-  return MeetingFormSchema.safeParse(readFormData(formData));
+function isUniqueConstraintError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === "23505"
+  );
 }
 
 export async function createMeeting(
-  _previousState: MeetingFormState,
+  previousState: MeetingFormState,
   formData: FormData,
 ): Promise<MeetingFormState> {
-  const validated = validateMeeting(formData);
+  const values = readFormData(formData);
+  const validated = MeetingFormSchema.safeParse(values);
 
   if (!validated.success) {
     return {
       message: "Please correct the highlighted fields.",
+      revision: previousState.revision + 1,
       errors: validated.error.flatten().fieldErrors,
+      values,
     };
   }
 
   try {
     await createMeetingRecord(toMeetingInput(validated.data));
   } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      return {
+        message: "Choose a different Sunday before saving.",
+        revision: previousState.revision + 1,
+        errors: { date: ["A meeting already exists for this date."] },
+        values,
+      };
+    }
     console.error("Unable to create meeting:", error);
-    throw new Error(
-      "We could not create the meeting. Check that the date is not already in use and try again.",
-    );
+    return {
+      message: "We could not create the meeting. Please try again.",
+      revision: previousState.revision + 1,
+      values,
+    };
   }
 
   revalidatePath("/meetings");
@@ -190,15 +219,18 @@ export async function createMeeting(
 
 export async function updateMeeting(
   id: number,
-  _previousState: MeetingFormState,
+  previousState: MeetingFormState,
   formData: FormData,
 ): Promise<MeetingFormState> {
-  const validated = validateMeeting(formData);
+  const values = readFormData(formData);
+  const validated = MeetingFormSchema.safeParse(values);
 
   if (!validated.success) {
     return {
       message: "Please correct the highlighted fields.",
+      revision: previousState.revision + 1,
       errors: validated.error.flatten().fieldErrors,
+      values,
     };
   }
 
@@ -209,10 +241,20 @@ export async function updateMeeting(
     );
     if (!updated) throw new Error(`Meeting ${id} was not found.`);
   } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      return {
+        message: "Choose a different Sunday before saving.",
+        revision: previousState.revision + 1,
+        errors: { date: ["A meeting already exists for this date."] },
+        values,
+      };
+    }
     console.error(`Unable to update meeting ${id}:`, error);
-    throw new Error(
-      "We could not update the meeting. Check that the date is not already in use and try again.",
-    );
+    return {
+      message: "We could not update the meeting. Please try again.",
+      revision: previousState.revision + 1,
+      values,
+    };
   }
 
   revalidatePath("/meetings");
