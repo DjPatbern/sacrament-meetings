@@ -23,7 +23,7 @@ export default function NotFound() {
         </p>
         <div className="not-found-actions">
           <Link className="button button-primary" href="/meetings">
-            Browse meetings
+            Browse meetings 
           </Link>
           <Link className="button button-secondary" href="/">
             Return home
