@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { MeetingCard } from "@/components/MeetingCard";
 import { MeetingSearch } from "@/components/MeetingSearch";
@@ -60,10 +61,15 @@ export default function MeetingsPage({
 }) {
   return (
     <main className="shell page-space">
-      <header className="page-heading">
-        <p className="eyebrow">Program archive</p>
-        <h1>Sacrament meetings</h1>
-        <p>View this Sunday’s program or revisit previous meetings.</p>
+      <header className="page-heading page-heading-actions">
+        <div>
+          <p className="eyebrow">Program archive</p>
+          <h1>Sacrament meetings</h1>
+          <p>View this Sunday’s program or revisit previous meetings.</p>
+        </div>
+        <Link className="button button-primary" href="/meetings/new">
+          Create meeting
+        </Link>
       </header>
       <Suspense fallback={<ResultsSkeleton />}>
         <MeetingResults searchParams={searchParams} />
