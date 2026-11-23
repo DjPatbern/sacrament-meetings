@@ -5,6 +5,7 @@ const links = [
   { href: "/", label: "Home" },
   { href: "/meetings", label: "Meetings" },
   { href: "/meetings/current", label: "This Sunday" },
+  { href: "/login", label: "Leader sign in" },
 ];
 export function NavLinks() {
   const pathname = usePathname();

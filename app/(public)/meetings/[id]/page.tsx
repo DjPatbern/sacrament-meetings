@@ -10,7 +10,31 @@ export async function generateMetadata({
 }: MeetingPageProps): Promise<Metadata> {
   const { id } = await params;
   const meeting = /^\d+$/.test(id) ? await getMeetingById(Number(id)) : null;
-  return { title: meeting ? `Meeting · ${meeting.date}` : "Meeting not found" };
+  if (!meeting) {
+    return {
+      title: "Meeting not found",
+      description: "The requested sacrament meeting program was not found.",
+    };
+  }
+
+  const description = `Sacrament meeting program for ${meeting.date}, conducted by ${meeting.conducting}.`;
+
+  return {
+    title: `Meeting · ${meeting.date}`,
+    description,
+    openGraph: {
+      title: `Sacrament meeting · ${meeting.date}`,
+      description,
+      images: [
+        {
+          url: "/opengraph-image",
+          width: 1200,
+          height: 630,
+          alt: "Meadowbrook Ward Sacrament Meeting Planner",
+        },
+      ],
+    },
+  };
 }
 export default async function MeetingPage({ params }: MeetingPageProps) {
   const { id } = await params;

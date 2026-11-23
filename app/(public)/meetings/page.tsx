@@ -1,12 +1,31 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { connection } from "next/server";
 import { Suspense } from "react";
+import { auth } from "@/auth";
 import { MeetingCard } from "@/components/MeetingCard";
 import { MeetingSearch } from "@/components/MeetingSearch";
 import { Pagination } from "@/components/Pagination";
 import { getMeetings, getMeetingsTotalPages } from "@/lib/meetings-db";
 
-export const metadata: Metadata = { title: "Meeting archive" };
+export const metadata: Metadata = {
+  title: "Meeting archive",
+  description:
+    "Browse current and past Meadowbrook Ward sacrament meeting programs.",
+  openGraph: {
+    title: "Meeting archive | Meadowbrook Ward",
+    description:
+      "Browse current and past Meadowbrook Ward sacrament meeting programs.",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Meadowbrook Ward Sacrament Meeting Planner",
+      },
+    ],
+  },
+};
 
 type MeetingsSearchParams = Promise<{ query?: string; page?: string }>;
 
@@ -15,13 +34,17 @@ async function MeetingResults({
 }: {
   searchParams: MeetingsSearchParams;
 }) {
+  await connection();
   const params = await searchParams;
   const query = params.query?.trim() ?? "";
   const requestedPage = Number.parseInt(params.page ?? "1", 10);
   const normalizedPage = Number.isFinite(requestedPage)
     ? Math.max(1, requestedPage)
     : 1;
-  const totalPages = await getMeetingsTotalPages(query);
+  const [session, totalPages] = await Promise.all([
+    auth(),
+    getMeetingsTotalPages(query),
+  ]);
   const currentPage = Math.min(normalizedPage, totalPages);
   const meetings = await getMeetings(query, currentPage);
 
@@ -31,7 +54,11 @@ async function MeetingResults({
       {meetings.length > 0 ? (
         <div className="meeting-list" aria-live="polite">
           {meetings.map((meeting) => (
-            <MeetingCard key={meeting.id} meeting={meeting} />
+            <MeetingCard
+              key={meeting.id}
+              meeting={meeting}
+              canManage={Boolean(session?.user)}
+            />
           ))}
         </div>
       ) : (
@@ -67,13 +94,28 @@ export default function MeetingsPage({
           <h1>Sacrament meetings</h1>
           <p>View this Sunday’s program or revisit previous meetings.</p>
         </div>
-        <Link className="button button-primary" href="/meetings/new">
-          Create meeting
-        </Link>
+        <Suspense fallback={null}>
+          <CreateMeetingLink />
+        </Suspense>
       </header>
       <Suspense fallback={<ResultsSkeleton />}>
         <MeetingResults searchParams={searchParams} />
       </Suspense>
     </main>
+  );
+}
+
+async function CreateMeetingLink() {
+  await connection();
+  const session = await auth();
+
+  return session?.user ? (
+    <Link className="button button-primary" href="/meetings/new">
+      Create meeting
+    </Link>
+  ) : (
+    <Link className="button button-secondary" href="/login">
+      Bishopric sign in
+    </Link>
   );
 }

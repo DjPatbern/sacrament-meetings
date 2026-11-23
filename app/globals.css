@@ -566,6 +566,69 @@ h3 {
   color: var(--p200);
   font-weight: 700;
 }
+.admin-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.admin-bar-actions span {
+  color: var(--p200);
+  font-size: 0.86rem;
+}
+.admin-sign-out {
+  border: 1px solid var(--p600);
+  border-radius: 999px;
+  padding: 7px 13px;
+  color: #fff;
+  background: transparent;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+.admin-sign-out:hover {
+  background: var(--p800);
+}
+.login-page {
+  display: grid;
+  place-items: center;
+  min-height: 68vh;
+  padding-block: 70px 100px;
+}
+.login-card {
+  width: min(100%, 520px);
+  padding: 44px;
+  border: 1px solid var(--line);
+  border-radius: 30px;
+  background: linear-gradient(145deg, #fff, var(--p50));
+  box-shadow: 0 28px 90px #321b4814;
+}
+.login-card h1 {
+  margin: 0;
+  font-size: clamp(2.35rem, 6vw, 3.8rem);
+}
+.login-copy {
+  margin: 14px 0 28px;
+  color: var(--muted);
+}
+.login-form {
+  display: grid;
+  gap: 20px;
+}
+.login-submit {
+  width: 100%;
+}
+.login-error {
+  margin: -4px 0 0;
+  color: #9f1239;
+  font-weight: 700;
+}
+.login-back-link {
+  display: inline-block;
+  margin-top: 24px;
+  color: var(--p800);
+  font-weight: 700;
+}
 .admin-placeholder {
   padding: 48px;
   border: 1px solid var(--line);
@@ -856,6 +919,14 @@ h3 {
   .brand small {
     display: none;
   }
+  .admin-bar-inner,
+  .admin-bar-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .admin-bar-inner {
+    padding-block: 14px;
+  }
 }
 @media (max-width: 520px) {
   .shell {
@@ -892,7 +963,8 @@ h3 {
   }
   .meeting-form,
   .form-section,
-  .route-message {
+  .route-message,
+  .login-card {
     padding: 24px 18px;
   }
   .form-actions .button,

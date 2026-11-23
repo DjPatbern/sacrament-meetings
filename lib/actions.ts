@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { auth } from "@/auth";
 import {
   createMeeting as createMeetingRecord,
   deleteMeeting as deleteMeetingRecord,
@@ -81,10 +82,7 @@ const MeetingFormSchema = z.object({
   wardBusiness: lineList.transform((items) =>
     items.map((description) => ({ description })),
   ),
-  stakeBusiness: z.preprocess(
-    (value) => value === "on" || value === "true",
-    z.boolean(),
-  ),
+  stakeBusiness: z.boolean(),
   sacramentHymnNumber: z.coerce
     .number()
     .int("Use a whole hymn number.")
@@ -178,10 +176,16 @@ function isUniqueConstraintError(error: unknown): boolean {
   );
 }
 
+async function requireBishopricSession(): Promise<void> {
+  const session = await auth();
+  if (!session?.user) redirect("/login");
+}
+
 export async function createMeeting(
   previousState: MeetingFormState,
   formData: FormData,
 ): Promise<MeetingFormState> {
+  await requireBishopricSession();
   const values = readFormData(formData);
   const validated = MeetingFormSchema.safeParse(values);
 
@@ -222,6 +226,7 @@ export async function updateMeeting(
   previousState: MeetingFormState,
   formData: FormData,
 ): Promise<MeetingFormState> {
+  await requireBishopricSession();
   const values = readFormData(formData);
   const validated = MeetingFormSchema.safeParse(values);
 
@@ -263,6 +268,7 @@ export async function updateMeeting(
 }
 
 export async function deleteMeeting(id: number): Promise<void> {
+  await requireBishopricSession();
   try {
     const deleted = await deleteMeetingRecord(id);
     if (!deleted) throw new Error(`Meeting ${id} was not found.`);

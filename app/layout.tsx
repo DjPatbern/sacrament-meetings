@@ -14,12 +14,34 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const productionHost =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : "http://localhost:3000");
+
 export const metadata: Metadata = {
+  metadataBase: new URL(productionHost),
   title: {
     default: "Sacrament Meetings | Meadowbrook Ward",
     template: "%s | Meadowbrook Ward",
   },
   description: "Sacrament meeting programs for the Meadowbrook Ward.",
+  openGraph: {
+    type: "website",
+    siteName: "Meadowbrook Ward Sacrament Meeting Planner",
+    title: "Sacrament Meetings | Meadowbrook Ward",
+    description:
+      "Prepare, manage, and share Meadowbrook Ward sacrament meeting programs.",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Meadowbrook Ward Sacrament Meeting Planner",
+      },
+    ],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

@@ -7,7 +7,13 @@ const labels = {
   stake: "Stake conference",
   general: "General conference",
 } as const;
-export function MeetingCard({ meeting }: { meeting: SacramentMeeting }) {
+export function MeetingCard({
+  meeting,
+  canManage = false,
+}: {
+  meeting: SacramentMeeting;
+  canManage?: boolean;
+}) {
   const deleteMeetingWithId = deleteMeeting.bind(null, meeting.id);
   const date = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
@@ -37,22 +43,26 @@ export function MeetingCard({ meeting }: { meeting: SacramentMeeting }) {
         >
           View <span aria-hidden="true">→</span>
         </Link>
-        <Link
-          className="text-link"
-          href={`/meetings/${meeting.id}/edit`}
-          aria-label={`Edit meeting for ${date}`}
-        >
-          Edit
-        </Link>
-        <form action={deleteMeetingWithId}>
-          <button
-            className="delete-button"
-            type="submit"
-            aria-label={`Delete meeting for ${date}`}
-          >
-            Delete
-          </button>
-        </form>
+        {canManage && (
+          <>
+            <Link
+              className="text-link"
+              href={`/meetings/${meeting.id}/edit`}
+              aria-label={`Edit meeting for ${date}`}
+            >
+              Edit
+            </Link>
+            <form action={deleteMeetingWithId}>
+              <button
+                className="delete-button"
+                type="submit"
+                aria-label={`Delete meeting for ${date}`}
+              >
+                Delete
+              </button>
+            </form>
+          </>
+        )}
       </div>
     </article>
   );
